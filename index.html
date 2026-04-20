@@ -14,7 +14,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
 .month-nav button:active{background:rgba(255,255,255,0.3)}
 .month-nav span{color:#fff;font-size:14px;font-weight:600;min-width:70px;text-align:center}
 .main-tabs{display:flex;background:#fff;border-bottom:1px solid #e5e5e7;position:sticky;top:47px;z-index:19}
-.mtab{flex:1;padding:11px 8px;text-align:center;font-size:13px;color:#888;cursor:pointer;border-bottom:2px solid transparent}
+.mtab{flex:1;padding:11px 8px;text-align:center;font-size:13px;color:#888;cursor:pointer;border-bottom:2px solid transparent;background:none;border-top:none;border-left:none;border-right:none;font-family:inherit;-webkit-appearance:none}
 .mtab.on{color:#1F4E79;border-bottom:2px solid #1F4E79;font-weight:600}
 .content{padding:12px 16px;padding-bottom:80px}
 .week-nav{display:flex;align-items:center;justify-content:space-between;background:#fff;border-radius:12px;padding:9px 12px;margin-bottom:10px;border:1px solid #e5e5e7}
@@ -70,7 +70,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
 .picker-handle{width:36px;height:4px;background:#e5e5e7;border-radius:2px;margin:0 auto 14px}
 .picker-ttl{font-size:13px;color:#888;text-align:center;margin-bottom:14px}
 .picker-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
-.popt{padding:12px 4px;text-align:center;border:1px solid #e5e5e7;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:#f9f9fb;color:#1d1d1f}
+.popt{padding:12px 4px;text-align:center;border:1px solid #e5e5e7;border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;background:#f9f9fb;color:#1d1d1f;font-family:inherit;-webkit-appearance:none}
 .popt:active{opacity:0.7}
 /* 연차·반차 – 초록 */
 .popt.p-yeon{background:#D6EFCA;border-color:#7BBF40;color:#2E5C0E}
@@ -102,7 +102,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
 .pin-dot{width:14px;height:14px;border-radius:50%;background:#e5e5e7;transition:background 0.15s}
 .pin-dot.filled{background:#1F4E79}
 .pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;width:240px}
-.pin-btn{height:56px;border:1px solid #e5e5e7;border-radius:14px;font-size:20px;font-weight:500;cursor:pointer;background:#fff;color:#1d1d1f;display:flex;align-items:center;justify-content:center}
+.pin-btn{height:56px;border:1px solid #e5e5e7;border-radius:14px;font-size:20px;font-weight:500;cursor:pointer;background:#fff;color:#1d1d1f;display:flex;align-items:center;justify-content:center;font-family:inherit;-webkit-appearance:none}
 .pin-btn:active{background:#f0f0f2;transform:scale(0.95)}
 .pin-btn.del{font-size:16px;color:#888}
 .pin-btn.empty{border:none;background:transparent;cursor:default}
@@ -175,9 +175,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
 </div>
 
 <div class="main-tabs">
-  <div class="mtab on" onclick="switchTab('input')">근태 입력</div>
-  <div class="mtab" onclick="switchTab('salary')">급여 계산</div>
-  <div class="mtab" onclick="switchTab('manage')">직원 관리</div>
+  <button class="mtab on" onclick="switchTab('input')">근태 입력</button>
+  <button class="mtab" onclick="switchTab('salary')">급여 계산</button>
+  <button class="mtab" onclick="switchTab('manage')">직원 관리</button>
 </div>
 
 <div class="content">
@@ -211,18 +211,18 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
           <div class="pin-dot" id="dot2"></div><div class="pin-dot" id="dot3"></div>
         </div>
         <div class="pin-pad">
-          <div class="pin-btn" onclick="pinInput(1)">1</div>
-          <div class="pin-btn" onclick="pinInput(2)">2</div>
-          <div class="pin-btn" onclick="pinInput(3)">3</div>
-          <div class="pin-btn" onclick="pinInput(4)">4</div>
-          <div class="pin-btn" onclick="pinInput(5)">5</div>
-          <div class="pin-btn" onclick="pinInput(6)">6</div>
-          <div class="pin-btn" onclick="pinInput(7)">7</div>
-          <div class="pin-btn" onclick="pinInput(8)">8</div>
-          <div class="pin-btn" onclick="pinInput(9)">9</div>
-          <div class="pin-btn empty"></div>
-          <div class="pin-btn" onclick="pinInput(0)">0</div>
-          <div class="pin-btn del" onclick="pinDelete()">&#9003;</div>
+          <button class="pin-btn" onclick="pinInput(1)">1</button>
+          <button class="pin-btn" onclick="pinInput(2)">2</button>
+          <button class="pin-btn" onclick="pinInput(3)">3</button>
+          <button class="pin-btn" onclick="pinInput(4)">4</button>
+          <button class="pin-btn" onclick="pinInput(5)">5</button>
+          <button class="pin-btn" onclick="pinInput(6)">6</button>
+          <button class="pin-btn" onclick="pinInput(7)">7</button>
+          <button class="pin-btn" onclick="pinInput(8)">8</button>
+          <button class="pin-btn" onclick="pinInput(9)">9</button>
+          <button class="pin-btn empty" style="border:none;background:transparent;cursor:default"></button>
+          <button class="pin-btn" onclick="pinInput(0)">0</button>
+          <button class="pin-btn del" onclick="pinDelete()">&#9003;</button>
         </div>
         <div class="pin-error" id="pin-error"></div>
       </div>
@@ -268,20 +268,20 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
     <div class="picker-handle"></div>
     <div class="picker-ttl" id="picker-ttl"></div>
     <div class="picker-grid">
-      <div class="popt p-yeon" onclick="pick('연차')">연차</div>
-      <div class="popt p-ban" onclick="pick('반차')">반차</div>
-      <div class="popt p-jong" onclick="pick('종추')">종추</div>
-      <div class="popt p-banj" onclick="pick('반추')">반추</div>
-      <div class="popt p-hyu" onclick="pick('휴무')">휴무</div>
-      <div class="popt p-dae" onclick="pick('대휴')">대휴</div>
-      <div class="popt p-jonggyul" onclick="pick('종결')">종결</div>
-      <div class="popt p-bangyul" onclick="pick('반결')">반결</div>
-      <div class="popt p-yuhyu" onclick="pick('유후')">유후</div>
-      <div class="popt p-banyou" onclick="pick('반유')">반유</div>
-      <div class="popt p-jongji" onclick="pick('종지')">종지</div>
-      <div class="popt p-banji" onclick="pick('반지')">반지</div>
-      <div class="popt p-jot" onclick="pick('조퇴')">조퇴</div>
-      <div class="popt p-clear" onclick="pick('')">지우기</div>
+      <button class="popt p-yeon" onclick="pick('연차')">연차</button>
+      <button class="popt p-ban" onclick="pick('반차')">반차</button>
+      <button class="popt p-jong" onclick="pick('종추')">종추</button>
+      <button class="popt p-banj" onclick="pick('반추')">반추</button>
+      <button class="popt p-hyu" onclick="pick('휴무')">휴무</button>
+      <button class="popt p-dae" onclick="pick('대휴')">대휴</button>
+      <button class="popt p-jonggyul" onclick="pick('종결')">종결</button>
+      <button class="popt p-bangyul" onclick="pick('반결')">반결</button>
+      <button class="popt p-yuhyu" onclick="pick('유후')">유후</button>
+      <button class="popt p-banyou" onclick="pick('반유')">반유</button>
+      <button class="popt p-jongji" onclick="pick('종지')">종지</button>
+      <button class="popt p-banji" onclick="pick('반지')">반지</button>
+      <button class="popt p-jot" onclick="pick('조퇴')">조퇴</button>
+      <button class="popt p-clear" onclick="pick('')">지우기</button>
     </div>
   </div>
 </div>
@@ -307,7 +307,7 @@ const DOW=['일','월','화','수','목','금','토'];
 const EMPS_KEY='emps_온점';
 const ATT_KEY='att_온점';
 
-let curY=2026, curM=4, curWeek=0, curTab='input', pickerTarget=null, pinVal='';
+const _now=new Date(); let curY=_now.getFullYear(), curM=_now.getMonth()+1, curWeek=0, curTab='input', pickerTarget=null, pinVal='';
 
 // localStorage 안전 래퍼 (카카오톡 인앱 브라우저 등 제한 환경 대응)
 function lsGet(key, fallback){
@@ -530,4 +530,108 @@ function addEmployee(){
 }
 
 function removeEmployee(i){
-  const name=e
+  const name=emps[i].n;
+  if(!confirm(`${name}을(를) 삭제할까요?`))return;
+  emps.splice(i,1);
+  saveData(true);
+  renderManage();
+  showToast(`${name} 삭제 완료`);
+}
+
+function saveData(silent){
+  lsSet(EMPS_KEY, emps);
+  lsSet(ATT_KEY, att);
+  if(!silent)showToast('저장 완료!');
+}
+
+let _lastCsvText='';
+
+function exportSummaryCSV(){
+  const total=daysInMonth(curY,curM);
+  const types=['연차','반차','종추','반추','휴무','대휴','종결','반결','유후','반유','종지','반지','조퇴'];
+  const header='이름,연차,반차,종추,반추,휴무,대휴,종결,반결,유후,반유,종지,반지,조퇴(h)';
+  let rows=[header];
+  emps.forEach(emp=>{
+    const cnt={};
+    types.forEach(t=>cnt[t]=0);
+    for(let d=1;d<=total;d++){
+      if(isSun(curY,curM,d)) continue;
+      const v=att[key(emp.n,curY,curM,d)]||'';
+      if(v && cnt[v]!==undefined) cnt[v]++;
+    }
+    rows.push([
+      emp.n,
+      cnt['연차'],cnt['반차'],cnt['종추'],cnt['반추'],
+      cnt['휴무'],cnt['대휴'],cnt['종결'],cnt['반결'],
+      cnt['유후'],cnt['반유'],cnt['종지'],cnt['반지'],cnt['조퇴']
+    ].join(','));
+  });
+  _lastCsvText=rows.join('\n');
+
+  // 모달 표시
+  const title=`${curY}년 ${curM}월 근태 데이터`;
+  document.getElementById('send-modal-title').textContent=title;
+  document.getElementById('send-modal-sub').textContent='아래 데이터를 복사하거나 카카오톡으로 전송하세요';
+  document.getElementById('send-data-box').textContent=_lastCsvText;
+
+  // Web Share API 지원 여부에 따라 버튼 텍스트 변경
+  const shareBtn=document.getElementById('send-kakao-btn');
+  if(navigator.share){
+    shareBtn.textContent='📤 카카오톡 / 문자로 전송';
+    shareBtn.style.display='block';
+  } else {
+    shareBtn.style.display='none';
+  }
+  document.getElementById('send-modal-bg').classList.add('show');
+}
+
+function shareData(){
+  const title=`${curY}년 ${curM}월 근태 데이터`;
+  if(navigator.share){
+    navigator.share({
+      title: title,
+      text: _lastCsvText
+    }).catch(()=>{});
+  }
+}
+
+function copyData(){
+  if(navigator.clipboard && navigator.clipboard.writeText){
+    navigator.clipboard.writeText(_lastCsvText)
+      .then(()=>showToast('복사 완료! 구글시트에 붙여넣기 하세요 📋'))
+      .catch(()=>fallbackCopy());
+  } else {
+    fallbackCopy();
+  }
+}
+
+function fallbackCopy(){
+  const box=document.getElementById('send-data-box');
+  const range=document.createRange();
+  range.selectNodeContents(box);
+  const sel=window.getSelection();
+  sel.removeAllRanges();
+  sel.addRange(range);
+  try{document.execCommand('copy');showToast('복사 완료! 구글시트에 붙여넣기 하세요 📋');}
+  catch(e){showToast('위 텍스트를 직접 선택해서 복사하세요');}
+}
+
+function closeSendModal(){
+  document.getElementById('send-modal-bg').classList.remove('show');
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),2000);
+}
+
+function renderAll(){
+  renderHeader();
+  renderInput();
+}
+
+renderAll();
+</script>
+</body>
+</html>
