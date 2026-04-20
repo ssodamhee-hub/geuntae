@@ -127,9 +127,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
 .add-form{background:#fff;border-radius:12px;border:1px solid #e5e5e7;padding:14px;margin-bottom:12px}
 .add-form-title{font-size:13px;font-weight:600;color:#1d1d1f;margin-bottom:12px}
 .form-row{display:flex;gap:8px;margin-bottom:8px}
-.form-input{flex:1;padding:10px 12px;border:1px solid #e5e5e7;border-radius:10px;font-size:13px;color:#1d1d1f;background:#f9f9fb;outline:none;font-family:inherit}
+.form-field{display:flex;flex-direction:column;flex:1;min-width:0}
+.form-label{font-size:11px;color:#888;margin-bottom:4px;font-weight:500;padding-left:2px}
+.form-input{width:100%;padding:10px 12px;border:1px solid #e5e5e7;border-radius:10px;font-size:13px;color:#1d1d1f;background:#f9f9fb;outline:none;font-family:inherit}
 .form-input:focus{border-color:#1F4E79;background:#fff}
-.form-select{padding:10px 12px;border:1px solid #e5e5e7;border-radius:10px;font-size:13px;color:#1d1d1f;background:#f9f9fb;outline:none;font-family:inherit}
+.form-select{width:100%;padding:10px 8px;border:1px solid #e5e5e7;border-radius:10px;font-size:13px;color:#1d1d1f;background:#f9f9fb;outline:none;font-family:inherit;min-width:0}
 .add-btn{width:100%;padding:11px;background:#1F4E79;color:#fff;border:none;border-radius:10px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit}
 .add-btn:active{background:#163a5c}
 .save-bar{position:fixed;bottom:0;left:0;right:0;background:#fff;border-top:1px solid #e5e5e7;padding:12px 16px;display:flex;gap:8px;z-index:18}
@@ -232,22 +234,37 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
     <div class="add-form">
       <div class="add-form-title">직원 추가</div>
       <div class="form-row">
-        <input class="form-input" id="new-name" placeholder="이름" />
-        <select class="form-select" id="new-group">
-          <option value="">일반</option>
-          <option value="B">B조</option>
-        </select>
+        <div class="form-field">
+          <div class="form-label">이름</div>
+          <input class="form-input" id="new-name" placeholder="이름 입력" />
+        </div>
+        <div class="form-field" style="flex:0 0 72px">
+          <div class="form-label">조</div>
+          <select class="form-select" id="new-group">
+            <option value="">일반</option>
+            <option value="B">B조</option>
+          </select>
+        </div>
       </div>
       <div class="form-row">
-        <input class="form-input" id="new-leave" type="number" placeholder="연차 일수" value="15" />
-        <select class="form-select" id="new-weekdays">
-          <option value="5">주5일 (월-금)</option>
-          <option value="5.5">주5.5일 (월-토 격주)</option>
-        </select>
+        <div class="form-field" style="flex:0 0 80px">
+          <div class="form-label">연차 (일)</div>
+          <input class="form-input" id="new-leave" type="number" value="15" />
+        </div>
+        <div class="form-field">
+          <div class="form-label">근무형태</div>
+          <select class="form-select" id="new-worktype">
+            <option value="5_8">주5일 종일 (8h)</option>
+            <option value="5.5_8">주5.5일 종일 (8h)</option>
+            <option value="5_4.5">주5일 반일 (4.5h)</option>
+          </select>
+        </div>
       </div>
       <div class="form-row">
-        <input class="form-input" id="new-dailyh" type="number" placeholder="일 근무시간 (예: 8, 4.5)" value="8" step="0.5" />
-        <input class="form-input" id="new-salary" type="number" placeholder="기본급 (월급, 원)" />
+        <div class="form-field">
+          <div class="form-label">기본급 (월급)</div>
+          <input class="form-input" id="new-salary" type="number" placeholder="원 입력" />
+        </div>
       </div>
       <button class="add-btn" onclick="addEmployee()">추가하기</button>
     </div>
@@ -512,13 +529,14 @@ function addEmployee(){
   if(!name){showToast('이름을 입력해주세요');return;}
   const group=document.getElementById('new-group').value;
   const leave=parseInt(document.getElementById('new-leave').value)||15;
-  const weekDays=parseFloat(document.getElementById('new-weekdays').value)||5;
-  const dailyH=parseFloat(document.getElementById('new-dailyh').value)||8;
+  const worktype=document.getElementById('new-worktype').value||'5_8';
+  const [wdStr,dhStr]=worktype.split('_');
+  const weekDays=parseFloat(wdStr)||5;
+  const dailyH=parseFloat(dhStr)||8;
   const salary=parseInt(document.getElementById('new-salary').value)||0;
   emps.push({n:name,g:group,leave,salary,weekDays,dailyH});
   document.getElementById('new-name').value='';
   document.getElementById('new-salary').value='';
-  document.getElementById('new-dailyh').value='8';
   saveData(true);renderManage();
   showToast(`${name} 추가 완료!`);
 }
@@ -582,9 +600,3 @@ function showToast(msg){
   const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
   setTimeout(()=>t.classList.remove('show'),2000);
 }
-
-function renderAll(){renderHeader();renderInput();}
-renderAll();
-</script>
-</body>
-</html>
