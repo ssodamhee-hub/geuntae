@@ -316,38 +316,31 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Apple SD Gothic Neo','Noto Sa
 
 <script>
 const PIN='1234';
-// 근로시간 환산 (급여대장 공식: 환산 = (소정+주휴+초과×1.5)×4.35)
-function calcHwansan(weekDays, dailyH){
-  const weekH=weekDays*dailyH, sojeong=Math.min(weekH,40), overH=Math.max(0,weekH-40), juhyu=dailyH;
+function calcHwansan(weekDays,dailyH){
+  const weekH=weekDays*dailyH,sojeong=Math.min(weekH,40),overH=Math.max(0,weekH-40),juhyu=dailyH;
   return Math.round((sojeong+juhyu+overH*1.5)*4.35*10)/10;
 }
 const DOW=['일','월','화','수','목','금','토'];
 const EMPS_KEY='emps_온점';
 const ATT_KEY='att_온점';
 const SALEXT_KEY='salext_온점';
-
-const _now=new Date(); let curY=_now.getFullYear(), curM=_now.getMonth()+1, curWeek=0, curTab='input', pickerTarget=null, pinVal='';
-
-// localStorage 안전 래퍼
+const _now=new Date();
+let curY=_now.getFullYear(),curM=_now.getMonth()+1,curWeek=0,curTab='input',pickerTarget=null,pinVal='';
 function lsGet(key,fallback){try{const v=localStorage.getItem(key);return v?JSON.parse(v):fallback;}catch(e){return fallback;}}
 function lsSet(key,val){try{localStorage.setItem(key,JSON.stringify(val));}catch(e){}}
-
 let emps=lsGet(EMPS_KEY,[]);
-// 구버전 마이그레이션
 emps=emps.map(emp=>{
-  let weekDays=emp.weekDays||5, dailyH=emp.dailyH||8;
+  let weekDays=emp.weekDays||5,dailyH=emp.dailyH||8;
   if(!emp.weekDays&&emp.workType==='주5.5일'){weekDays=5.5;}
   return{...emp,salary:emp.salary||0,weekDays,dailyH};
 });
 let att=lsGet(ATT_KEY,{});
 let salExtras=lsGet(SALEXT_KEY,{});
-
-function daysInMonth(y,m){return new Date(y,m,0).getDate()}
-function isSun(y,m,d){return new Date(y,m-1,d).getDay()===0}
-function isSat(y,m,d){return new Date(y,m-1,d).getDay()===6}
-function dw(y,m,d){return DOW[new Date(y,m-1,d).getDay()]}
-function key(n,y,m,d){return `${n}_${y}_${m}_${d}`}
-
+function daysInMonth(y,m){return new Date(y,m,0).getDate();}
+function isSun(y,m,d){return new Date(y,m-1,d).getDay()===0;}
+function isSat(y,m,d){return new Date(y,m-1,d).getDay()===6;}
+function dw(y,m,d){return DOW[new Date(y,m-1,d).getDay()];}
+function key(n,y,m,d){return n+'_'+y+'_'+m+'_'+d;}
 function getWeeks(y,m){
   const total=daysInMonth(y,m),weeks=[],firstDow=new Date(y,m-1,1).getDay();
   let end=firstDow===0?1:1+(7-firstDow);end=Math.min(end,total);
@@ -355,248 +348,199 @@ function getWeeks(y,m){
   let day=end+1;while(day<=total){const w=[];for(let i=0;i<7&&day<=total;i++,day++)w.push(day);weeks.push(w);}
   return weeks;
 }
-
-function changeMonth(dir){curM+=dir;if(curM>12){curM=1;curY++}if(curM<1){curM=12;curY--}curWeek=0;renderAll();}
+function changeMonth(dir){curM+=dir;if(curM>12){curM=1;curY++;}if(curM<1){curM=12;curY--;}curWeek=0;renderAll();}
 function changeWeek(dir){const wks=getWeeks(curY,curM);curWeek=Math.max(0,Math.min(wks.length-1,curWeek+dir));renderInput();}
-
 function switchTab(t){
   curTab=t;
-  ['input','salary','manage'].forEach(id=>{document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
-  document.querySelectorAll('.mtab').forEach((el,i)=>el.classList.toggle('on',['input','salary','manage'][i]===t));
+  ['input','salary','manage'].forEach(function(id){document.getElementById('tab-'+id).style.display=id===t?'block':'none';});
+  document.querySelectorAll('.mtab').forEach(function(el,i){el.classList.toggle('on',['input','salary','manage'][i]===t);});
   if(t==='salary'){document.getElementById('pin-screen').style.display='block';document.getElementById('salary-screen').style.display='none';pinVal='';updateDots();}
   if(t==='manage')renderManage();
 }
-
-function renderHeader(){document.getElementById('month-label').textContent=`${curY}년 ${curM}월`;}
-
+function renderHeader(){document.getElementById('month-label').textContent=curY+'년 '+curM+'월';}
 function renderInput(){
   const wks=getWeeks(curY,curM),wk=wks[curWeek]||[],s=wk[0],e=wk[wk.length-1];
-  document.getElementById('week-label').textContent=`${curM}/${s}(${dw(curY,curM,s)}) — ${curM}/${e}(${dw(curY,curM,e)})`;
-  document.getElementById('week-badge').textContent=`${curWeek+1}주차`;
+  document.getElementById('week-label').textContent=curM+'/'+s+'('+dw(curY,curM,s)+') \u2014 '+curM+'/'+e+'('+dw(curY,curM,e)+')';
+  document.getElementById('week-badge').textContent=(curWeek+1)+'주차';
   document.getElementById('btn-prev').disabled=curWeek===0;
   document.getElementById('btn-next').disabled=curWeek===getWeeks(curY,curM).length-1;
   if(emps.length===0){
-    document.getElementById('emp-list').innerHTML=`<div style="text-align:center;padding:48px 16px;color:#aaa"><div style="font-size:36px;margin-bottom:12px">&#128100;</div><div style="font-size:14px;font-weight:600;color:#888;margin-bottom:6px">등록된 직원이 없어요</div><div style="font-size:12px">'직원 관리' 탭에서 직원을 추가해주세요</div></div>`;
+    document.getElementById('emp-list').innerHTML='<div style="text-align:center;padding:48px 16px;color:#aaa"><div style="font-size:36px;margin-bottom:12px">&#128100;</div><div style="font-size:14px;font-weight:600;color:#888;margin-bottom:6px">등록된 직원이 없어요</div><div style="font-size:12px">\'직원 관리\' 탭에서 직원을 추가해주세요</div></div>';
     return;
   }
-  document.getElementById('emp-list').innerHTML=emps.map(emp=>{
-    const cells=wk.map(d=>{
+  document.getElementById('emp-list').innerHTML=emps.map(function(emp){
+    const cells=wk.map(function(d){
       const v=isSun(curY,curM,d)?'휴무':(att[key(emp.n,curY,curM,d)]||'');
       const cls=isSun(curY,curM,d)?'sun':isSat(curY,curM,d)?'sat':'';
-      const onclick=!isSun(curY,curM,d)?` onclick="openPicker('${emp.n}',${d})"`:'' ;
-      return `<div class="dcell ${cls}"${v&&!isSun(curY,curM,d)?' data-v="'+v+'"':''}${onclick}><span class="dd">${d}</span><span class="dn">${dw(curY,curM,d)}</span><span class="dc">${isSun(curY,curM,d)?'휴무':(v||'')}</span></div>`;
+      const oc=!isSun(curY,curM,d)?' onclick="openPicker(\''+emp.n+'\','+d+')"':'';
+      return '<div class="dcell '+cls+'"'+(v&&!isSun(curY,curM,d)?' data-v="'+v+'"':'')+oc+'><span class="dd">'+d+'</span><span class="dn">'+dw(curY,curM,d)+'</span><span class="dc">'+(isSun(curY,curM,d)?'휴무':(v||''))+'</span></div>';
     }).join('');
-    const hwLabel=`주${emp.weekDays||5}일·${emp.dailyH||8}h`;
-    return `<div class="emp-card"><div class="emp-head"><span class="emp-nm">${emp.n}</span><span class="badge-n">${hwLabel}</span></div><div class="days-wrap">${cells}</div></div>`;
+    return '<div class="emp-card"><div class="emp-head"><span class="emp-nm">'+emp.n+'</span><span class="badge-n">주'+(emp.weekDays||5)+'일·'+(emp.dailyH||8)+'h</span></div><div class="days-wrap">'+cells+'</div></div>';
   }).join('');
 }
-
 function openPicker(name,day){
-  pickerTarget={name,day};
-  document.getElementById('picker-ttl').textContent=`${name}  ${curM}월 ${day}일(${dw(curY,curM,day)}) 근태 선택`;
+  pickerTarget={name:name,day:day};
+  document.getElementById('picker-ttl').textContent=name+'  '+curM+'월 '+day+'일('+dw(curY,curM,day)+') 근태 선택';
   document.getElementById('picker-bg').classList.add('show');
 }
-document.getElementById('picker-bg').addEventListener('click',e=>{if(e.target===document.getElementById('picker-bg'))closePicker();});
+document.getElementById('picker-bg').addEventListener('click',function(e){if(e.target===document.getElementById('picker-bg'))closePicker();});
 function closePicker(){document.getElementById('picker-bg').classList.remove('show');}
-
 function pick(v){
-  if(pickerTarget){const k=key(pickerTarget.name,curY,curM,pickerTarget.day);if(v)att[k]=v;else delete att[k];renderInput();}
+  if(pickerTarget){var k=key(pickerTarget.name,curY,curM,pickerTarget.day);if(v)att[k]=v;else delete att[k];renderInput();}
   closePicker();
 }
-
 function pinInput(n){
   if(pinVal.length>=4)return;pinVal+=String(n);updateDots();
-  if(pinVal.length===4){setTimeout(()=>{
+  if(pinVal.length===4){setTimeout(function(){
     if(pinVal===PIN){document.getElementById('pin-screen').style.display='none';document.getElementById('salary-screen').style.display='block';renderSalary();}
-    else{document.getElementById('pin-error').textContent='비밀번호가 틀렸어요';setTimeout(()=>{pinVal='';updateDots();document.getElementById('pin-error').textContent='';},800);}
+    else{document.getElementById('pin-error').textContent='비밀번호가 틀렸어요';setTimeout(function(){pinVal='';updateDots();document.getElementById('pin-error').textContent='';},800);}
     pinVal='';updateDots();},150);}
 }
 function pinDelete(){pinVal=pinVal.slice(0,-1);updateDots();document.getElementById('pin-error').textContent='';}
-function updateDots(){for(let i=0;i<4;i++)document.getElementById('dot'+i).classList.toggle('filled',i<pinVal.length);}
+function updateDots(){for(var i=0;i<4;i++)document.getElementById('dot'+i).classList.toggle('filled',i<pinVal.length);}
 function lockSalary(){document.getElementById('salary-screen').style.display='none';document.getElementById('pin-screen').style.display='block';pinVal='';updateDots();}
-
-// ── 급여 계산 핵심 함수 ──────────────────────────────────────
-function calcEmpPay(emp, y, m, support, jotaeH){
-  const salary=emp.salary||0;
-  const weekDays=emp.weekDays||5, dailyH=emp.dailyH||8;
-  const weekH=weekDays*dailyH, sojeong=Math.min(weekH,40), juhyu=dailyH;
-  const hwansan=calcHwansan(weekDays,dailyH);
-  const sojeongMonthly=(sojeong+juhyu)*4.35;
-  const hourly=hwansan>0?Math.round(salary*sojeongMonthly/(hwansan*hwansan)):0;
-  const daily=hourly*dailyH;
-
-  const total=daysInMonth(y,m);
-  let jongchu=0,banchu=0,jonggyul=0,bangyul=0;
-  for(let d=1;d<=total;d++){
+function calcEmpPay(emp,y,m,support,jotaeH){
+  var salary=emp.salary||0;
+  var weekDays=emp.weekDays||5,dailyH=emp.dailyH||8;
+  var weekH=weekDays*dailyH,sojeong=Math.min(weekH,40),juhyu=dailyH;
+  var hwansan=calcHwansan(weekDays,dailyH);
+  var sojeongMonthly=(sojeong+juhyu)*4.35;
+  var hourly=hwansan>0?Math.round(salary*sojeongMonthly/(hwansan*hwansan)):0;
+  var daily=hourly*dailyH;
+  var total=daysInMonth(y,m);
+  var jongchu=0,banchu=0,jonggyul=0,bangyul=0;
+  for(var d=1;d<=total;d++){
     if(isSun(y,m,d))continue;
-    const v=att[key(emp.n,y,m,d)]||'';
+    var v=att[key(emp.n,y,m,d)]||'';
     if(v==='종추')jongchu++;
     else if(v==='반추')banchu++;
     else if(v==='종결')jonggyul++;
     else if(v==='반결')bangyul++;
   }
-  const extra=Math.round(jongchu*daily*1.5+banchu*(daily/2)*1.5);
-  const deduct=Math.round(-(jonggyul*daily+bangyul*(daily/2)+(jotaeH||0)*hourly));
-  return {salary,hourly,daily,jongchu,banchu,jonggyul,bangyul,extra,deduct,support:support||0,finalPay:salary+extra+deduct+(support||0)};
+  var extra=Math.round(jongchu*daily*1.5+banchu*(daily/2)*1.5);
+  var deduct=Math.round(-(jonggyul*daily+bangyul*(daily/2)+(jotaeH||0)*hourly));
+  return {salary:salary,hourly:hourly,daily:daily,jongchu:jongchu,banchu:banchu,jonggyul:jonggyul,bangyul:bangyul,extra:extra,deduct:deduct,support:support||0,finalPay:salary+extra+deduct+(support||0)};
 }
-
 function calcLeave(emp){
-  let used=0,earned=0;
-  Object.entries(att).forEach(([k,v])=>{
-    if(!k.startsWith(emp.n+'_'))return;
+  var used=0,earned=0;
+  Object.keys(att).forEach(function(k){
+    var v=att[k];
+    if(k.indexOf(emp.n+'_')!==0)return;
     if(v==='연차')used++;else if(v==='반차')used+=0.5;else if(v==='대휴')earned+=1.5;
   });
-  return{total:emp.leave||0,used,earned,remaining:Math.max(0,(emp.leave||0)-used+earned)};
+  return{total:emp.leave||0,used:used,earned:earned,remaining:Math.max(0,(emp.leave||0)-used+earned)};
 }
-
-function getSalExt(name,y,m){return salExtras[`${name}_${y}_${m}`]||{support:0,jotaeH:0};}
-function setSalExt(name,y,m,data){salExtras[`${name}_${y}_${m}`]=data;lsSet(SALEXT_KEY,salExtras);}
-
+function getSalExt(name,y,m){return salExtras[name+'_'+y+'_'+m]||{support:0,jotaeH:0};}
+function setSalExt(name,y,m,data){salExtras[name+'_'+y+'_'+m]=data;lsSet(SALEXT_KEY,salExtras);}
 function updateSalExt(name,field,value){
-  const ext=getSalExt(name,curY,curM);
+  var ext=getSalExt(name,curY,curM);
   ext[field]=parseFloat(value)||0;
   setSalExt(name,curY,curM,ext);
   renderSalary();
 }
-
 function renderSalary(){
-  let totFinal=0,totExtra=0,totDeduct=0;
-  const rows=emps.map(emp=>{
-    const ext=getSalExt(emp.n,curY,curM);
-    const p=calcEmpPay(emp,curY,curM,ext.support,ext.jotaeH);
-    const lv=calcLeave(emp);
+  var totFinal=0,totExtra=0,totDeduct=0;
+  var rows=emps.map(function(emp){
+    var ext=getSalExt(emp.n,curY,curM);
+    var p=calcEmpPay(emp,curY,curM,ext.support,ext.jotaeH);
+    var lv=calcLeave(emp);
     totFinal+=p.finalPay;totExtra+=p.extra;totDeduct+=p.deduct;
-    const lvClass=lv.remaining<=3?'leave-warn':'leave-ok';
-
-    const tags=[
-      p.jongchu?`<span class="sal-tag t-b">종추${p.jongchu}</span>`:'',
-      p.banchu?`<span class="sal-tag t-b">반추${p.banchu}</span>`:'',
-      p.jonggyul?`<span class="sal-tag t-r">종결${p.jonggyul}</span>`:'',
-      p.bangyul?`<span class="sal-tag t-r">반결${p.bangyul}</span>`:'',
+    var lvClass=lv.remaining<=3?'leave-warn':'leave-ok';
+    var tags=[
+      p.jongchu?'<span class="sal-tag t-b">종추'+p.jongchu+'</span>':'',
+      p.banchu?'<span class="sal-tag t-b">반추'+p.banchu+'</span>':'',
+      p.jonggyul?'<span class="sal-tag t-r">종결'+p.jonggyul+'</span>':'',
+      p.bangyul?'<span class="sal-tag t-r">반결'+p.bangyul+'</span>':''
     ].filter(Boolean).join('');
-
-    const parts=[];
-    if(p.extra)parts.push(`+${p.extra.toLocaleString()}`);
-    if(p.deduct)parts.push(`${p.deduct.toLocaleString()}`);
-    if(p.support)parts.push(`지원+${p.support.toLocaleString()}`);
-    const detail=parts.length?`기본 ${p.salary.toLocaleString()} ${parts.join(' ')}`:p.salary?`기본 ${p.salary.toLocaleString()}`:'기본급 미입력';
-
-    return `<div class="sal-row">
-      <div style="flex:1">
-        <div style="display:flex;align-items:center;gap:6px">
-          <span class="sal-name">${emp.n}</span>
-          <span class="badge-n ${lvClass}" style="font-size:9px">연차${lv.remaining}일</span>
-        </div>
-        <div class="sal-detail">${detail}</div>
-      </div>
-      <div class="sal-nums">${tags}<span class="sal-pay">${p.finalPay.toLocaleString()}원</span></div>
-    </div>
-    <div class="sal-ext-row">
-      <span class="sal-ext-label">지원금</span>
-      <input class="sal-ext-input" type="number" placeholder="0" value="${ext.support||''}" oninput="updateSalExt('${emp.n}','support',this.value)" step="10000">
-      <span class="sal-ext-label" style="margin-left:8px">조퇴</span>
-      <input class="sal-ext-input" type="number" placeholder="0h" value="${ext.jotaeH||''}" oninput="updateSalExt('${emp.n}','jotaeH',this.value)" step="0.5" style="width:60px">
-      <span class="sal-ext-label">h</span>
-    </div>`;
+    var parts=[];
+    if(p.extra)parts.push('+'+p.extra.toLocaleString());
+    if(p.deduct)parts.push(p.deduct.toLocaleString());
+    if(p.support)parts.push('지원+'+p.support.toLocaleString());
+    var detail=parts.length?'기본 '+p.salary.toLocaleString()+' '+parts.join(' '):p.salary?'기본 '+p.salary.toLocaleString():'기본급 미입력';
+    return '<div class="sal-row"><div style="flex:1"><div style="display:flex;align-items:center;gap:6px"><span class="sal-name">'+emp.n+'</span><span class="badge-n '+lvClass+'" style="font-size:9px">연차'+lv.remaining+'일</span></div><div class="sal-detail">'+detail+'</div></div><div class="sal-nums">'+tags+'<span class="sal-pay">'+p.finalPay.toLocaleString()+'원</span></div></div>'
+    +'<div class="sal-ext-row"><span class="sal-ext-label">지원금</span><input class="sal-ext-input" type="number" placeholder="0" value="'+(ext.support||'')+'" oninput="updateSalExt(\''+emp.n+'\',\'support\',this.value)" step="10000"><span class="sal-ext-label" style="margin-left:8px">조퇴</span><input class="sal-ext-input" type="number" placeholder="0h" value="'+(ext.jotaeH||'')+'" oninput="updateSalExt(\''+emp.n+'\',\'jotaeH\',this.value)" step="0.5" style="width:60px"><span class="sal-ext-label">h</span></div>';
   }).join('');
-
-  document.getElementById('sum-cards').innerHTML=`
-    <div class="scard"><div class="scard-label">전체 급여 합계</div><div class="scard-val">${Math.round(totFinal/10000)}만원</div><div class="scard-sub">${totFinal.toLocaleString()}원</div></div>
-    <div class="scard"><div class="scard-label">추가 / 차감</div><div class="scard-val" style="font-size:15px">${totExtra?'+'+Math.round(totExtra/10000)+'만':'-'}</div><div class="scard-sub">${totDeduct?totDeduct.toLocaleString()+'원 차감':''}</div></div>`;
-  document.getElementById('sal-wrap').innerHTML=`
-    <div class="sal-header"><span>이름 · 잔여연차</span><span>급여</span></div>${rows}
-    <div class="sal-row total"><span class="sal-name" style="font-weight:700">합계</span><div class="sal-nums"><span class="sal-pay" style="font-size:13px">${totFinal.toLocaleString()}원</span></div></div>`;
+  document.getElementById('sum-cards').innerHTML='<div class="scard"><div class="scard-label">전체 급여 합계</div><div class="scard-val">'+Math.round(totFinal/10000)+'만원</div><div class="scard-sub">'+totFinal.toLocaleString()+'원</div></div><div class="scard"><div class="scard-label">추가 / 차감</div><div class="scard-val" style="font-size:15px">'+(totExtra?'+'+Math.round(totExtra/10000)+'만':'-')+'</div><div class="scard-sub">'+(totDeduct?totDeduct.toLocaleString()+'원 차감':'')+'</div></div>';
+  document.getElementById('sal-wrap').innerHTML='<div class="sal-header"><span>이름 · 잔여연차</span><span>급여</span></div>'+rows+'<div class="sal-row total"><span class="sal-name" style="font-weight:700">합계</span><div class="sal-nums"><span class="sal-pay" style="font-size:13px">'+totFinal.toLocaleString()+'원</span></div></div>';
 }
-
 function renderManage(){
   document.getElementById('manage-list').innerHTML=emps.length===0
     ?'<div style="padding:24px;text-align:center;color:#aaa;font-size:13px">등록된 직원이 없어요</div>'
-    :emps.map((emp,i)=>{
-      const lv=calcLeave(emp);
-      const lvClass=lv.remaining<=3?'leave-warn':'leave-ok';
-      return `<div class="emp-manage-row">
-        <div class="emp-manage-info">
-          <div class="emp-manage-name">${emp.n}<span class="badge-b" style="font-weight:400">주${emp.weekDays||5}일·${emp.dailyH||8}h</span></div>
-          <div class="emp-manage-sub">기본급 ${(emp.salary||0).toLocaleString()}원 · 연차 <span class="${lvClass}">${lv.remaining}</span>/${emp.leave}일 · 환산 ${calcHwansan(emp.weekDays||5,emp.dailyH||8)}h</div>
-        </div>
-        <button class="del-btn" onclick="removeEmployee(${i})">삭제</button>
-      </div>`;
+    :emps.map(function(emp,i){
+      var lv=calcLeave(emp);
+      var lvClass=lv.remaining<=3?'leave-warn':'leave-ok';
+      return '<div class="emp-manage-row"><div class="emp-manage-info"><div class="emp-manage-name">'+emp.n+'<span class="badge-b" style="font-weight:400">주'+(emp.weekDays||5)+'일·'+(emp.dailyH||8)+'h</span></div><div class="emp-manage-sub">기본급 '+(emp.salary||0).toLocaleString()+'원 · 연차 <span class="'+lvClass+'">'+lv.remaining+'</span>/'+emp.leave+'일 · 환산 '+calcHwansan(emp.weekDays||5,emp.dailyH||8)+'h</div></div><button class="del-btn" onclick="removeEmployee('+i+')">삭제</button></div>';
     }).join('');
 }
-
 function addEmployee(){
-  const name=document.getElementById('new-name').value.trim();
+  var name=document.getElementById('new-name').value.trim();
   if(!name){showToast('이름을 입력해주세요');return;}
-  const group=document.getElementById('new-group').value;
-  const leave=parseInt(document.getElementById('new-leave').value)||15;
-  const worktype=document.getElementById('new-worktype').value||'5_8';
-  const [wdStr,dhStr]=worktype.split('_');
-  const weekDays=parseFloat(wdStr)||5;
-  const dailyH=parseFloat(dhStr)||8;
-  const salary=parseInt(document.getElementById('new-salary').value)||0;
-  emps.push({n:name,g:group,leave,salary,weekDays,dailyH});
+  var group=document.getElementById('new-group').value;
+  var leave=parseInt(document.getElementById('new-leave').value)||15;
+  var worktype=document.getElementById('new-worktype').value||'5_8';
+  var parts=worktype.split('_');
+  var weekDays=parseFloat(parts[0])||5;
+  var dailyH=parseFloat(parts[1])||8;
+  var salary=parseInt(document.getElementById('new-salary').value)||0;
+  emps.push({n:name,g:group,leave:leave,salary:salary,weekDays:weekDays,dailyH:dailyH});
   document.getElementById('new-name').value='';
   document.getElementById('new-salary').value='';
   saveData(true);renderManage();
-  showToast(`${name} 추가 완료!`);
+  showToast(name+' 추가 완료!');
 }
-
 function removeEmployee(i){
-  const name=emps[i].n;
-  if(!confirm(`${name}을(를) 삭제할까요?`))return;
-  emps.splice(i,1);saveData(true);renderManage();showToast(`${name} 삭제 완료`);
+  var name=emps[i].n;
+  if(!confirm(name+'을(를) 삭제할까요?'))return;
+  emps.splice(i,1);saveData(true);renderManage();showToast(name+' 삭제 완료');
 }
-
 function saveData(silent){
   lsSet(EMPS_KEY,emps);lsSet(ATT_KEY,att);
   if(!silent)showToast('저장 완료!');
 }
-
-let _lastCsvText='';
-
+var _lastCsvText='';
 function exportSummaryCSV(){
-  const total=daysInMonth(curY,curM);
-  const types=['연차','반차','종추','반추','휴무','대휴','종결','반결','유후','반유','종지','반지','조퇴'];
-  const header='이름,연차,반차,종추,반추,휴무,대휴,종결,반결,유후,반유,종지,반지,조퇴(h)';
-  let rows=[header];
-  emps.forEach(emp=>{
-    const cnt={};types.forEach(t=>cnt[t]=0);
-    for(let d=1;d<=total;d++){
+  var total=daysInMonth(curY,curM);
+  var types=['연차','반차','종추','반추','휴무','대휴','종결','반결','유후','반유','종지','반지','조퇴'];
+  var header='이름,연차,반차,종추,반추,휴무,대휴,종결,반결,유후,반유,종지,반지,조퇴(h)';
+  var rows=[header];
+  emps.forEach(function(emp){
+    var cnt={};types.forEach(function(t){cnt[t]=0;});
+    for(var d=1;d<=total;d++){
       if(isSun(curY,curM,d))continue;
-      const v=att[key(emp.n,curY,curM,d)]||'';
+      var v=att[key(emp.n,curY,curM,d)]||'';
       if(v&&cnt[v]!==undefined)cnt[v]++;
     }
     rows.push([emp.n,cnt['연차'],cnt['반차'],cnt['종추'],cnt['반추'],cnt['휴무'],cnt['대휴'],cnt['종결'],cnt['반결'],cnt['유후'],cnt['반유'],cnt['종지'],cnt['반지'],cnt['조퇴']].join(','));
   });
   _lastCsvText=rows.join('\n');
-  document.getElementById('send-modal-title').textContent=`${curY}년 ${curM}월 근태 데이터`;
+  document.getElementById('send-modal-title').textContent=curY+'년 '+curM+'월 근태 데이터';
   document.getElementById('send-modal-sub').textContent='아래 데이터를 복사하거나 카카오톡으로 전송하세요';
   document.getElementById('send-data-box').textContent=_lastCsvText;
-  const shareBtn=document.getElementById('send-kakao-btn');
+  var shareBtn=document.getElementById('send-kakao-btn');
   if(navigator.share){shareBtn.style.display='block';}else{shareBtn.style.display='none';}
   document.getElementById('send-modal-bg').classList.add('show');
 }
-
 function shareData(){
-  if(navigator.share){navigator.share({title:`${curY}년 ${curM}월 근태 데이터`,text:_lastCsvText}).catch(()=>{});}
+  if(navigator.share){navigator.share({title:curY+'년 '+curM+'월 근태 데이터',text:_lastCsvText}).catch(function(){});}
 }
-
 function copyData(){
   if(navigator.clipboard&&navigator.clipboard.writeText){
-    navigator.clipboard.writeText(_lastCsvText).then(()=>showToast('복사 완료! 구글시트에 붙여넣기 하세요')).catch(()=>fallbackCopy());
+    navigator.clipboard.writeText(_lastCsvText).then(function(){showToast('복사 완료! 구글시트에 붙여넣기 하세요');}).catch(function(){fallbackCopy();});
   }else{fallbackCopy();}
 }
-
 function fallbackCopy(){
-  const box=document.getElementById('send-data-box');
-  const range=document.createRange();range.selectNodeContents(box);
-  const sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+  var box=document.getElementById('send-data-box');
+  var range=document.createRange();range.selectNodeContents(box);
+  var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
   try{document.execCommand('copy');showToast('복사 완료!');}catch(e){showToast('위 텍스트를 직접 선택해서 복사하세요');}
 }
-
 function closeSendModal(){document.getElementById('send-modal-bg').classList.remove('show');}
-
 function showToast(msg){
-  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
-  setTimeout(()=>t.classList.remove('show'),2000);
+  var t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(function(){t.classList.remove('show');},2000);
 }
+function renderAll(){renderHeader();renderInput();}
+renderAll();
+</script>
+</body>
+</html>
